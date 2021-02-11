@@ -1,70 +1,39 @@
 #include <iostream>
 #include <string>
+#include <sstream>
 
-bool InputStrings (std::string* s, int size, int& x, int& o) {
+bool validChar(char c) {
+    return (c >= 'A' && c <= 'Z') ||
+            (c >= 'a' && c <= 'z') ||
+            (c == '-') || (c == '.') ||
+            (c >= '0' && c <= '9');
+}
 
-    std::cout << "Enter " << size << " strings:" << std::endl;
-    for (int i = 0; i < size; i++) {
-        std::cin >> s[i];
-        if (s[i].length() != 3) {
-            std::cout << "Incorrect input! Wrong size of string!" << std::endl;
-            return false;
-        } else {
-            for (char j : s[i]) {
-                if (j == 'X') {
-                    x++;
-                } else if (j == 'O') {
-                    o++;
-                } else if (j != '.') {
+bool validCharLogin(char c) {
+    return (c == 33) ||
+           (c >= 35 && c <= 39) ||
+           (c >= 42 && c <= 43) ||
+           (c == 45) ||
+           (c == 47) ||
+           (c == 61) ||
+           (c == 63) ||
+           (c >= 94 && c <= 96) ||
+           (c >= 125 && c <= 126);
+}
+
+bool CheckValidChars(std::string& s, bool login = false) {
+    if (login && (s.length() < 1 || s.length() > 64)) {
+        return false;
+    } else if (!login && (s.length() < 1 || s.length() > 63)) {
+        return false;
+    }
+    for (int i = 0; i < s.length(); ++i) {
+        if (validChar(s[i]) || (login && validCharLogin(s[i]))) {
+            if (s[i] == '.') {
+                if (s[i-1] == '.' || i == 0 || i == s.length()) {
                     return false;
                 }
             }
-        }
-    }
-    return true;
-}
-
-bool CheckHorizLines(std::string* s, int size, bool &match, char& win) {
-    for (int i = 0; i < size; ++i) {
-        if (s[i] == "XXX" && !match) {
-            match = true;
-            win = 'X';
-        } else if (s[i] == "OOO" && !match) {
-            match = true;
-            win = 'O';
-        } else if (s[i] == "XXX" || s[i] == "OOO") {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool CheckVertLines(std::string* s, int size, bool& match, char& win) {
-    for (int i = 0; i < size; ++i) {
-        if (s[0][i] == s[1][i] && s[1][i] == s[2][i]) {
-            if (!match && (s[0][i] == 'X')) {
-                match = true;
-                win = 'X';
-            } else if (!match && (s[0][i] == 'O')) {
-                match = true;
-                win = 'O';
-            } else if (s[0][i] != '.') {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
-bool CheckDiagLines(std::string* s, bool& match, char& win) {
-    if (s[0][0] == s[1][1] && s[1][1] == s[2][2] ||
-        s[0][2] == s[1][1] && s[1][1] == s[2][0]) {
-        if (s[1][1] == 'X') {
-            match = true;
-            win = 'X';
-        } else if (s[1][1] == 'O') {
-            match = true;
-            win = 'O';
         } else {
             return false;
         }
@@ -73,38 +42,29 @@ bool CheckDiagLines(std::string* s, bool& match, char& win) {
 }
 
 int main() {
-    int command = 1;
-    const int sizeOfField = 3;
-    std::string field[sizeOfField];
-    while (command == 1) {
-        int xCount = 0;
-        int oCount = 0;
+    std::string str, login, domain;
 
-        if (InputStrings(field, sizeOfField, xCount, oCount)) {
-            bool match = false;
-            char winner = 'N';
-            int diff = std::abs(xCount - oCount);
+    while (str != "0") {
+        std::cout << "Enter @mail: " << std::endl;
+        std::getline(std::cin, str);
 
-            if (CheckHorizLines(field, sizeOfField, match, winner) &&
-                CheckVertLines(field, sizeOfField, match, winner) &&
-                CheckDiagLines(field, match, winner)) {
-                if (winner == 'X' && xCount >= oCount && diff < 2) {
-                    std::cout << "Petya won!" <<std::endl;
-                } else if (winner == 'O' && oCount >= xCount && diff < 2) {
-                    std::cout << "Vanya won!" <<std::endl;
-                } else if (winner == 'N' && diff < 2) {
-                    std::cout << "Nobody!" << std::endl;
-                } else {
-                    std::cout << "Incorrect input! Invalid combination!" << std::endl;
-                }
-            } else {
-                std::cout << "Incorrect input! Matches in two or more rows!" << std::endl;
-            }
+        std::stringstream ss(str);
+
+        std::getline(ss, login, '@');
+        std::getline(ss, domain);
+
+        std::cout << "login " << login << std::endl;
+        std::cout << "domain " << domain << std::endl;
+
+        if (!login.empty() && !domain.empty() &&
+                CheckValidChars(login, true) &&
+                CheckValidChars(domain)) {
+            std::cout << "Yes" << std::endl;
         } else {
-            std::cout << "Incorrect input! Invalid characters!" << std::endl;
+            std::cout << "No" << std::endl;
         }
-        std::cout << "Enter 1 to continue or any symbol to exit: ";
-        std::cin >> command;
     }
+
     return 0;
 }
+
