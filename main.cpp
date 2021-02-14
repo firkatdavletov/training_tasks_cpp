@@ -41,7 +41,7 @@ bool CheckIP(const std::string& str) {
         return false;
     } else {
         return true;
-    };
+    }
 }
 
 void AnswerYes() {
@@ -65,4 +65,3 @@ int main() {
     }
     return 0;
 }
-
