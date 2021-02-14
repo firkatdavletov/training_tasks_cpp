@@ -2,69 +2,67 @@
 #include <string>
 #include <sstream>
 
-bool validChar(char c) {
-    return (c >= 'A' && c <= 'Z') ||
-            (c >= 'a' && c <= 'z') ||
-            (c == '-') || (c == '.') ||
-            (c >= '0' && c <= '9');
-}
+bool NumbIsNotValid(const std::string& str) {
 
-bool validCharLogin(char c) {
-    return (c == 33) ||
-           (c >= 35 && c <= 39) ||
-           (c >= 42 && c <= 43) ||
-           (c == 45) ||
-           (c == 47) ||
-           (c == 61) ||
-           (c == 63) ||
-           (c >= 94 && c <= 96) ||
-           (c >= 125 && c <= 126);
-}
-
-bool CheckValidChars(std::string& s, bool login = false) {
-    if (login && (s.length() < 1 || s.length() > 64)) {
-        return false;
-    } else if (!login && (s.length() < 1 || s.length() > 63)) {
-        return false;
-    }
-    for (int i = 0; i < s.length(); ++i) {
-        if (validChar(s[i]) || (login && validCharLogin(s[i]))) {
-            if (s[i] == '.') {
-                if (s[i-1] == '.' || i == 0 || i == s.length()) {
-                    return false;
-                }
+    if (str.empty() || (str.length() > 1 && str[0] == '0')) {
+        return true;
+    } else {
+        for (char i : str) {
+            if (i < '0' || i > '9') {
+                return true;
             }
+        }
+
+        int a = std::stoi(str);
+
+        if (a > 255) {
+            return true;
         } else {
             return false;
         }
     }
-    return true;
+}
+
+bool CheckIP(const std::string& str) {
+
+    std::string ip[4], temp;
+    std::stringstream ss(str);
+    if (str.back() == '.') {
+        return false;
+    }
+    for (int i = 0; i < 4; ++i) {
+        std::getline(ss, ip[i], '.');
+        if (NumbIsNotValid(ip[i])) {
+            return false;
+        }
+    }
+    // Если в потоке остались символы размер адреса IP неверный
+    if (ss >> temp) {
+        return false;
+    } else {
+        return true;
+    };
+}
+
+void AnswerYes() {
+    std::cout << "Yes" << std::endl;
+}
+
+void AnswerNo() {
+    std::cout << "No" << std::endl;
 }
 
 int main() {
-    std::string str, login, domain;
+    std::string ip;
 
-    while (str != "0") {
-        std::cout << "Enter @mail: " << std::endl;
-        std::getline(std::cin, str);
+    while (ip != "0") {
+        const int size = 4;
 
-        std::stringstream ss(str);
+        std::cout << "Enter IP-address (enter 0 to exit): " << std::endl;
+        std::getline(std::cin, ip);
 
-        std::getline(ss, login, '@');
-        std::getline(ss, domain);
-
-        std::cout << "login " << login << std::endl;
-        std::cout << "domain " << domain << std::endl;
-
-        if (!login.empty() && !domain.empty() &&
-                CheckValidChars(login, true) &&
-                CheckValidChars(domain)) {
-            std::cout << "Yes" << std::endl;
-        } else {
-            std::cout << "No" << std::endl;
-        }
+        CheckIP(ip) ? AnswerYes() : AnswerNo();
     }
-
     return 0;
 }
 
